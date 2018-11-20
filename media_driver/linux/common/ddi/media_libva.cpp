@@ -31,6 +31,8 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <chrono>
+#include <thread>
 
 #ifndef ANDROID
 #include <X11/Xutil.h>
@@ -3338,6 +3340,12 @@ static VAStatus DdiMedia_SyncSurface (
     {
         // Just loop while gem_bo_wait times-out.
     }
+
+    PDDI_MEDIA_CONTEXT mediaDrvCtx = DdiMedia_GetMediaContext(ctx);
+    if(mediaDrvCtx->platform.eRenderCoreFamily     == IGFX_GEN9_CORE)
+        if (surface->curStatusReport.decode.status != CODECHAL_STATUS_SUCCESSFUL ||
+        	surface->curStatusReport.vpp.status    != VPREP_OK)
+        		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     uint32_t i = 0;
     PDDI_DECODE_CONTEXT decCtx = (PDDI_DECODE_CONTEXT)surface->pDecCtx;
